@@ -159,7 +159,7 @@ function onPointerUp() {
     </defs>
 
     <!-- 连线 -->
-    <g v-if="store.bindings.value.length > 0">
+    <g v-if="linkElements.length > 0">
       <line
         v-for="link in linkElements"
         :key="link.id"
