@@ -1,5 +1,5 @@
 <script  setup>
-import { ChartLine, List, Terminal } from 'lucide-vue-next'
+import { ChartLine, List, Network, Terminal } from 'lucide-vue-next'
 import { useLayout } from '@/composables/useLayout'
 
 const { workspaceMode, showFullScreen, showTerminalMode, showSettingPanel, showQuickInputPanel, showSendPanel, fullScreenBreakpoint, setWorkspaceMode } = useLayout()
@@ -11,7 +11,7 @@ const buttonClass = computed(() => {
 
 <template>
   <div class="p-2 flex items-center justify-end relative">
-    <SearchTool v-if="workspaceMode === 'record'" />
+    <SearchTool v-if="workspaceMode !== 'terminal'" />
 
     <div class="flex items-center space-x-1 relative">
       <ToggleGroup
@@ -33,6 +33,10 @@ const buttonClass = computed(() => {
         <ToggleGroupItem value="terminal" class="h-8 px-2">
           <Terminal class="size-4" />
           <span>终端</span>
+        </ToggleGroupItem>
+        <ToggleGroupItem value="topology" class="h-8 px-2">
+          <Network class="size-4" />
+          <span>拓扑</span>
         </ToggleGroupItem>
       </ToggleGroup>
       <Separator orientation="vertical" class="h-6" />

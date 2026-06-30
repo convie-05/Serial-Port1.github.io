@@ -13,7 +13,17 @@ export const DEFAULT_LAYOUT_CONFIG = Object.freeze({
   showSendPanel: true,
 })
 
-const WORKSPACE_MODES = ['record', 'plotter', 'terminal']
+const WORKSPACE_MODES = ['record', 'plotter', 'terminal', 'topology']
+
+function normalizeBool(val, defaultVal) {
+  if (typeof val === 'boolean')
+    return val
+  if (val === 'true')
+    return true
+  if (val === 'false')
+    return false
+  return defaultVal
+}
 
 function normalizeWorkspaceMode(mode) {
   return WORKSPACE_MODES.includes(mode) ? mode : DEFAULT_LAYOUT_CONFIG.workspaceMode
@@ -36,6 +46,7 @@ export const useLayout = createGlobalState(() => {
     ref(DEFAULT_LAYOUT_CONFIG.showFullScreen),
     { listenToStorageChanges: false },
   )
+  showFullScreen.value = normalizeBool(showFullScreen.value, DEFAULT_LAYOUT_CONFIG.showFullScreen)
   const toggleFullScreen = () => {
     showFullScreen.value = !showFullScreen.value
   }
@@ -45,6 +56,7 @@ export const useLayout = createGlobalState(() => {
     ref(DEFAULT_LAYOUT_CONFIG.showTerminalMode),
     { listenToStorageChanges: false },
   )
+  legacyShowTerminalMode.value = normalizeBool(legacyShowTerminalMode.value, DEFAULT_LAYOUT_CONFIG.showTerminalMode)
 
   // 工作区模式
   const workspaceMode = useLocalStorage(
@@ -82,11 +94,21 @@ export const useLayout = createGlobalState(() => {
     legacyShowTerminalMode.value = normalized === 'terminal'
   }, { immediate: true })
 
+  const showTopologyMode = computed({
+    get: () => workspaceMode.value === 'topology',
+    set: (value) => {
+      workspaceMode.value = value ? 'topology' : 'record'
+    },
+  })
+
   const toggleTerminalMode = () => {
     workspaceMode.value = showTerminalMode.value ? 'record' : 'terminal'
   }
   const togglePlotterMode = () => {
     workspaceMode.value = showPlotterMode.value ? 'record' : 'plotter'
+  }
+  const toggleTopologyMode = () => {
+    workspaceMode.value = showTopologyMode.value ? 'record' : 'topology'
   }
 
   // 设置面板
@@ -95,6 +117,7 @@ export const useLayout = createGlobalState(() => {
     ref(DEFAULT_LAYOUT_CONFIG.showSettingPanel),
     { listenToStorageChanges: false },
   )
+  showSettingPanel.value = normalizeBool(showSettingPanel.value, DEFAULT_LAYOUT_CONFIG.showSettingPanel)
   const toggleSettingPanel = () => {
     showSettingPanel.value = !showSettingPanel.value
   }
@@ -105,6 +128,7 @@ export const useLayout = createGlobalState(() => {
     ref(DEFAULT_LAYOUT_CONFIG.showQuickInputPanel),
     { listenToStorageChanges: false },
   )
+  showQuickInputPanel.value = normalizeBool(showQuickInputPanel.value, DEFAULT_LAYOUT_CONFIG.showQuickInputPanel)
   const toggleQuickInputPanel = () => {
     showQuickInputPanel.value = !showQuickInputPanel.value
   }
@@ -115,6 +139,7 @@ export const useLayout = createGlobalState(() => {
     ref(DEFAULT_LAYOUT_CONFIG.showTopBar),
     { listenToStorageChanges: false },
   )
+  showTopBar.value = normalizeBool(showTopBar.value, DEFAULT_LAYOUT_CONFIG.showTopBar)
   const toggleTopBar = () => {
     showTopBar.value = !showTopBar.value
   }
@@ -125,6 +150,7 @@ export const useLayout = createGlobalState(() => {
     ref(DEFAULT_LAYOUT_CONFIG.showActivityBar),
     { listenToStorageChanges: false },
   )
+  showActivityBar.value = normalizeBool(showActivityBar.value, DEFAULT_LAYOUT_CONFIG.showActivityBar)
   const toggleActivityBar = () => {
     showActivityBar.value = !showActivityBar.value
   }
@@ -135,6 +161,7 @@ export const useLayout = createGlobalState(() => {
     ref(DEFAULT_LAYOUT_CONFIG.showSendPanel),
     { listenToStorageChanges: false },
   )
+  showSendPanel.value = normalizeBool(showSendPanel.value, DEFAULT_LAYOUT_CONFIG.showSendPanel)
   const toggleSendPanel = () => {
     showSendPanel.value = !showSendPanel.value
   }
@@ -191,6 +218,7 @@ export const useLayout = createGlobalState(() => {
     showFullScreen,
     showTerminalMode,
     showPlotterMode,
+    showTopologyMode,
     showSettingPanel,
     showQuickInputPanel,
     showTopBar,
@@ -200,10 +228,11 @@ export const useLayout = createGlobalState(() => {
     // 全屏控制
     toggleFullScreen,
 
-    // 终端模式控制
+    // 工作模式控制
     setWorkspaceMode,
     toggleTerminalMode,
     togglePlotterMode,
+    toggleTopologyMode,
 
     // 设置面板控制
     toggleSettingPanel,

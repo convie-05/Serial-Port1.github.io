@@ -15,18 +15,27 @@ async function getOnline(userId) {
       'Content-Type': 'application/json',
     },
   })
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`)
+  }
   return await res.json()
 }
 
 export default createGlobalState(() => {
   const uuid = useLocalStorage('uuid', generateUUID())
-  const online = ref({ led: 'none' })
+  const online = ref({ led: 'none', serial: 0 })
   const { pause, resume } = useIntervalFn(
     async () => {
-      console.log('uuid:', uuid.value)
-      const res = await getOnline(uuid.value)
-      console.log('res:', res)
-      online.value = res.data
+      try {
+        console.log('uuid:', uuid.value)
+        const res = await getOnline(uuid.value)
+        console.log('res:', res)
+        online.value = res?.data || { led: 'none', serial: 0 }
+      }
+      catch (err) {
+        console.warn('[useOnline] 获取在线人数失败:', err.message || err)
+        // 保持上次状态，不中断轮询
+      }
     },
     1000 * 60,
     { immediate: true, immediateCallback: true },

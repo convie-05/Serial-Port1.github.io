@@ -14,7 +14,7 @@ import { useSerialStore } from '@/store/useSerialStore'
 import { useSettingStore } from '@/store/useSettingStore'
 
 const { readType, sendType, nextReadType, nextSendType } = useSerialStore()
-const { pinBottom, clearRecords, exportRecords } = useRecordStore()
+const { pinBottom, clearReadRecords, clearWriteRecords, exportRecords } = useRecordStore()
 const { isAutoSending, isFileSending, selectFile } = useSendStore()
 const { deviceType } = useSettingStore()
 const fileInputRef = ref(null)
@@ -143,13 +143,27 @@ const typeCssMap = {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
-          <Badge class="cursor-pointer" @click="clearRecords">
+          <Badge class="cursor-pointer" @click="clearReadRecords">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Material Symbols by Google - https://github.com/google/material-design-icons/blob/master/LICENSE --><path fill="currentColor" d="M16.4 21L15 19.6l2.1-2.1l-2.1-2.1l1.4-1.4l2.1 2.1l2.1-2.1l1.4 1.4l-2.075 2.1L22 19.6L20.6 21l-2.1-2.075zM12 21q-3.45 0-6.012-2.287T3.05 13H5.1q.35 2.6 2.313 4.3T12 19q.275 0 .513-.012t.487-.063v2.025q-.25.025-.488.038T12 21M3 10V4h2v2.35q1.275-1.6 3.113-2.475T12 3q3.75 0 6.375 2.625T21 12h-2q0-2.925-2.037-4.962T12 5q-1.725 0-3.225.8T6.25 8H9v2zm10.35 4.75L11 12.4V7h2v4.6l1.4 1.4z" /></svg>
-            清屏
+            清空接收
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
-          <p>点击清除接收窗口消息</p>
+          <p>清除接收窗口消息</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge class="cursor-pointer" @click="clearWriteRecords">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Material Symbols by Google - https://github.com/google/material-design-icons/blob/master/LICENSE --><path fill="currentColor" d="M16.4 21L15 19.6l2.1-2.1l-2.1-2.1l1.4-1.4l2.1 2.1l2.1-2.1l1.4 1.4l-2.075 2.1L22 19.6L20.6 21l-2.1-2.075zM12 21q-3.45 0-6.012-2.287T3.05 13H5.1q.35 2.6 2.313 4.3T12 19q.275 0 .513-.012t.487-.063v2.025q-.25.025-.488.038T12 21M3 10V4h2v2.35q1.275-1.6 3.113-2.475T12 3q3.75 0 6.375 2.625T21 12h-2q0-2.925-2.037-4.962T12 5q-1.725 0-3.225.8T6.25 8H9v2zm10.35 4.75L11 12.4V7h2v4.6l1.4 1.4z" /></svg>
+            清空发送
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>清除发送窗口消息</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

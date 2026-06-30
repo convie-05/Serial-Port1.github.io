@@ -728,6 +728,60 @@ async function handleClearRecords(payload) {
   }
 }
 
+async function handleClearRecordsByType(payload) {
+  const sessionId = payload.sessionId || currentSessionId
+  const recordType = payload.recordType
+  if (!sessionId || !recordType)
+    return { stats: currentStats(), sessions: sessionsCache }
+
+  let remainingCount = 0
+  if (!dbAvailable || !persistEnabled) {
+    const list = memoryRecords.get(sessionId) || []
+    const filtered = list.filter(r => r.type !== recordType)
+    memoryRecords.set(sessionId, filtered)
+    remainingCount = filtered.length
+  }
+  else {
+    const allRecords = await fetchRecordRange(sessionId, 0, recordCounts.get(sessionId) || 0)
+    const toDelete = allRecords.filter(r => r.type === recordType)
+    remainingCount = (recordCounts.get(sessionId) || 0) - toDelete.length
+    const tx = db.transaction(['records', 'sessions'], 'readwrite')
+    const recordStore = tx.objectStore('records')
+    toDelete.forEach(record => recordStore.delete([sessionId, record.index]))
+    const session = getSession(sessionId)
+    tx.objectStore('sessions').put({
+      ...session,
+      recordCount: remainingCount,
+      updatedAt: Date.now(),
+    })
+    await transactionDone(tx)
+  }
+
+  recordCounts.set(sessionId, remainingCount)
+  if (sessionId === currentSessionId) {
+    const records = await fetchRecordRange(sessionId, 0, recordCounts.get(sessionId) || 0)
+    let rxC = 0
+    let txC = 0
+    for (const r of records) {
+      const byteLen = r.dataBuffer?.byteLength || 0
+      if (r.type === 'read')
+        rxC += byteLen
+      else txC += byteLen
+    }
+    rxCount = rxC
+    txCount = txC
+    recordCount = remainingCount
+    liveRecordPreview = records.length > 0 ? records[records.length - 1] : null
+  }
+  const session = getSession(sessionId)
+  if (session) {
+    session.recordCount = remainingCount
+    session.updatedAt = Date.now()
+  }
+  emitSessions()
+  return { sessions: sessionsCache, stats: currentStats() }
+}
+
 async function handleDeleteSession(payload) {
   const sessionId = payload.sessionId
   if (!sessionId)
@@ -1129,6 +1183,8 @@ async function dispatch(type, payload) {
       return handleGetRecentWriteRecords(payload)
     case 'clearRecords':
       return handleClearRecords(payload)
+    case 'clearRecordsByType':
+      return handleClearRecordsByType(payload)
     case 'deleteSession':
       return handleDeleteSession(payload)
     case 'clearAllSessions':

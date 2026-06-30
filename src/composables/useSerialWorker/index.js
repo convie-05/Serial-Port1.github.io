@@ -297,6 +297,24 @@ function createLocalBackend() {
       stats = { rxCount: 0, txCount: 0, recordCount: 0, liveRecordPreview: null }
       return { stats, sessions }
     }
+    if (type === 'clearRecordsByType') {
+      const sessionId = payload.sessionId || currentSessionId
+      const recordType = payload.recordType
+      const list = getRecords(sessionId)
+      const filtered = list.filter(r => r.type !== recordType)
+      list.length = 0
+      list.push(...filtered)
+      let rxC = 0
+      let txC = 0
+      for (const r of filtered) {
+        const byteLen = r.dataBuffer?.byteLength || 0
+        if (r.type === 'read')
+          rxC += byteLen
+        else txC += byteLen
+      }
+      stats = { rxCount: rxC, txCount: txC, recordCount: filtered.length, liveRecordPreview: stats.liveRecordPreview }
+      return { stats, sessions }
+    }
     if (type === 'deleteSession') {
       const index = sessions.findIndex(item => item.id === payload.sessionId)
       if (index >= 0)
@@ -480,6 +498,7 @@ export const useSerialWorker = createGlobalState(() => {
     deleteSession: sessionId => request('deleteSession', { sessionId }),
     clearAllSessions: () => request('clearAllSessions'),
     clearRecords: sessionId => request('clearRecords', { sessionId }),
+    clearRecordsByType: (sessionId, recordType) => request('clearRecordsByType', { sessionId, recordType }),
     updateSettings: settings => request('updateSettings', settings),
     attachSerialStreams: (payload, transfer) => request('attachSerialStreams', payload, transfer),
     closeSerialStreams: () => request('closeSerialStreams'),

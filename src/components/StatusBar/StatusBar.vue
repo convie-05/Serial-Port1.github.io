@@ -65,7 +65,7 @@ const {
       </TooltipProvider>
 
       <div>
-        当前有 {{ online.serial }} 位小伙伴正在与你一同调试串口~
+        当前有 {{ online.serial ?? 0 }} 位小伙伴正在与你一同调试串口~
       </div>
     </div>
     <!-- right -->

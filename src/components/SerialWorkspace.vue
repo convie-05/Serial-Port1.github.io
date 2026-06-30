@@ -2,11 +2,14 @@
 import { defineAsyncComponent, onBeforeUnmount, provide, ref, watch } from 'vue'
 import ActivityBar from '@/components/ActivityBar/ActivityBar.vue'
 import ControlPanel from '@/components/ControlPanel/ControlPanel.vue'
+import NodeTopologyPanel from '@/components/NodeTopology/NodeTopologyPanel.vue'
 import PlotterPanel from '@/components/PlotterPanel/PlotterPanel.vue'
+import QuickInputPanel from '@/components/QuickInputPanel/QuickInputPanel.vue'
 import RecordPanel from '@/components/RecordPanel/RecordPanel.vue'
 import SendPanel from '@/components/SendPanel/SendPanel.vue'
 import DeviceSetting from '@/components/SettingPanel/DeviceSetting.vue'
 import StatusBar from '@/components/StatusBar/StatusBar.vue'
+import TerminalPanel from '@/components/TerminalPanel/TerminalPanel.vue'
 import TopBar from '@/components/TopBar/TopBar.vue'
 import {
   ResizableHandle,
@@ -31,7 +34,7 @@ const DialogProvider = defineAsyncComponent(() => import('@/components/Dialog/Pr
 
 const { addRecord } = useRecordStore()
 const { readType } = useSerialStore()
-const { showFullScreen, showTerminalMode, showPlotterMode, fullScreenBreakpoint, showSettingPanel, showQuickInputPanel, showSendPanel } = useLayout()
+const { showFullScreen, showTerminalMode, showPlotterMode, showTopologyMode, fullScreenBreakpoint, showSettingPanel, showQuickInputPanel, showSendPanel } = useLayout()
 const settingPanelRef = ref()
 const sendPanelRef = ref()
 
@@ -180,11 +183,19 @@ if (typeof window !== 'undefined') {
         />
 
         <ResizablePanelGroup
+          id="workspace-root"
           direction="horizontal"
           class="flex-1"
           :class="{ 'border-t border-r border-b': !showFullScreen }"
         >
-          <ResizablePanel ref="settingPanelRef" :default-size="20" :min-size="20" collapsible>
+          <ResizablePanel
+            ref="settingPanelRef"
+            :order="1"
+            :default-size="20"
+            :min-size="20"
+            :collapsed-size="0"
+            collapsible
+          >
             <div class="h-full bg-sidebar/55 backdrop-blur-sm">
               <DeviceSetting />
             </div>
@@ -192,31 +203,38 @@ if (typeof window !== 'undefined') {
 
           <ResizableHandle with-handle />
 
-          <ResizablePanel v-if="!showTerminalMode" :default-size="80">
-            <ResizablePanelGroup direction="vertical">
-              <ResizablePanel :default-size="70">
+          <ResizablePanel :order="2" :default-size="80" @resize="onTerminalAreaResize">
+            <NodeTopologyPanel v-if="showTopologyMode" key="mode-topology" class="w-full h-full" />
+            <ResizablePanelGroup v-else-if="!showTerminalMode" id="workspace-record" key="mode-record" direction="vertical">
+              <ResizablePanel :order="10" :default-size="70">
                 <PlotterPanel v-if="showPlotterMode" class="bg-background/40 backdrop-blur-sm w-full h-full" />
-                <RecordPanel v-else class="bg-background/40 backdrop-blur-sm w-full h-full" />
+                <div v-else class="flex flex-col h-full overflow-hidden">
+                  <RecordPanel class="flex-1 min-h-0" />
+                  <ControlPanel class="border-t border-border/50" />
+                </div>
               </ResizablePanel>
               <ResizableHandle with-handle />
-              <ResizablePanel ref="sendPanelRef" :default-size="30" :min-size="30" collapsible>
+              <ResizablePanel
+                ref="sendPanelRef"
+                :order="11"
+                :default-size="30"
+                :min-size="30"
+                :collapsed-size="0"
+                collapsible
+              >
                 <div class="flex flex-col bg-background/40 backdrop-blur-sm h-full">
-                  <ControlPanel />
                   <SendPanel class="flex-1" />
                 </div>
               </ResizablePanel>
             </ResizablePanelGroup>
-          </ResizablePanel>
-
-          <ResizablePanel v-else :default-size="80" @resize="onTerminalAreaResize">
-            <TerminalPanel ref="terminalPanelRef" />
+            <TerminalPanel v-else key="mode-terminal" ref="terminalPanelRef" />
           </ResizablePanel>
         </ResizablePanelGroup>
 
         <StatusBar class="bg-sidebar/55 backdrop-blur-sm border-r border-b border-t" />
       </div>
       <div
-        v-if="showQuickInputPanel && !showTerminalMode"
+        v-if="showQuickInputPanel"
         class="h-full bg-sidebar/55 backdrop-blur-sm max-w-150 w-full border-l"
         :class="[showFullScreen ? '' : 'rounded-r-lg border']"
       >

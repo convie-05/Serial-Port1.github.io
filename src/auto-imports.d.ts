@@ -11,6 +11,7 @@ declare global {
   const FILE_RECORD_DISPLAY: typeof import('./utils/filePayload.js')['FILE_RECORD_DISPLAY']
   const FILE_SEND_CHUNK_SIZE: typeof import('./utils/filePayload.js')['FILE_SEND_CHUNK_SIZE']
   const LARGE_FILE_WARNING_SIZE: typeof import('./utils/filePayload.js')['LARGE_FILE_WARNING_SIZE']
+  const NodeProtocolError: typeof import('./composables/useNodeProtocol/index.js')['NodeProtocolError']
   const SERIAL_BROWSER_SUPPORT_REASONS: typeof import('./utils/browserSupport.js')['SERIAL_BROWSER_SUPPORT_REASONS']
   const asyncComputed: typeof import('@vueuse/core')['asyncComputed']
   const autoResetRef: typeof import('@vueuse/core')['autoResetRef']
@@ -225,6 +226,8 @@ declare global {
   const useMutationObserver: typeof import('@vueuse/core')['useMutationObserver']
   const useNavigatorLanguage: typeof import('@vueuse/core')['useNavigatorLanguage']
   const useNetwork: typeof import('@vueuse/core')['useNetwork']
+  const useNodeAutoScan: typeof import('./composables/useNodeAutoScan/index.js')['useNodeAutoScan']
+  const useNodeProtocol: typeof import('./composables/useNodeProtocol/index.js')['useNodeProtocol']
   const useNow: typeof import('@vueuse/core')['useNow']
   const useNprogress: typeof import('./composables/useNprogress/index.js')['useNprogress']
   const useObjectUrl: typeof import('@vueuse/core')['useObjectUrl']
@@ -333,6 +336,7 @@ declare module 'vue' {
     readonly FILE_RECORD_DISPLAY: UnwrapRef<typeof import('./utils/filePayload.js')['FILE_RECORD_DISPLAY']>
     readonly FILE_SEND_CHUNK_SIZE: UnwrapRef<typeof import('./utils/filePayload.js')['FILE_SEND_CHUNK_SIZE']>
     readonly LARGE_FILE_WARNING_SIZE: UnwrapRef<typeof import('./utils/filePayload.js')['LARGE_FILE_WARNING_SIZE']>
+    readonly NodeProtocolError: UnwrapRef<typeof import('./composables/useNodeProtocol/index.js')['NodeProtocolError']>
     readonly SERIAL_BROWSER_SUPPORT_REASONS: UnwrapRef<typeof import('./utils/browserSupport.js')['SERIAL_BROWSER_SUPPORT_REASONS']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
@@ -341,6 +345,7 @@ declare module 'vue' {
     readonly computedEager: UnwrapRef<typeof import('@vueuse/core')['computedEager']>
     readonly computedInject: UnwrapRef<typeof import('@vueuse/core')['computedInject']>
     readonly computedWithControl: UnwrapRef<typeof import('@vueuse/core')['computedWithControl']>
+    readonly connectPlotterData: UnwrapRef<typeof import('./composables/usePlotterDataBridge/index.js')['connectPlotterData']>
     readonly controlledComputed: UnwrapRef<typeof import('@vueuse/core')['controlledComputed']>
     readonly controlledRef: UnwrapRef<typeof import('@vueuse/core')['controlledRef']>
     readonly copyToUint8Array: UnwrapRef<typeof import('./utils/filePayload.js')['copyToUint8Array']>
@@ -546,6 +551,8 @@ declare module 'vue' {
     readonly useMutationObserver: UnwrapRef<typeof import('@vueuse/core')['useMutationObserver']>
     readonly useNavigatorLanguage: UnwrapRef<typeof import('@vueuse/core')['useNavigatorLanguage']>
     readonly useNetwork: UnwrapRef<typeof import('@vueuse/core')['useNetwork']>
+    readonly useNodeAutoScan: UnwrapRef<typeof import('./composables/useNodeAutoScan/index.js')['useNodeAutoScan']>
+    readonly useNodeProtocol: UnwrapRef<typeof import('./composables/useNodeProtocol/index.js')['useNodeProtocol']>
     readonly useNow: UnwrapRef<typeof import('@vueuse/core')['useNow']>
     readonly useNprogress: UnwrapRef<typeof import('./composables/useNprogress/index.js')['useNprogress']>
     readonly useObjectUrl: UnwrapRef<typeof import('@vueuse/core')['useObjectUrl']>

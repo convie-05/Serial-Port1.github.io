@@ -39,6 +39,27 @@ export const useRecordStore = createGlobalState(() => {
     await worker.clearRecords(worker.currentSessionId.value)
   }
 
+  async function clearReadRecords() {
+    const sessionId = worker.currentSessionId.value
+    const { stats, sessions } = await worker.clearRecordsByType(sessionId, 'read')
+    records.value = records.value.filter(r => r.type !== 'read')
+    readingRecord.value = undefined
+    if (stats) {
+      rxCount.value = stats.rxCount
+      recordCount.value = stats.recordCount
+    }
+  }
+
+  async function clearWriteRecords() {
+    const sessionId = worker.currentSessionId.value
+    const { stats, sessions } = await worker.clearRecordsByType(sessionId, 'write')
+    records.value = records.value.filter(r => r.type !== 'write')
+    if (stats) {
+      txCount.value = stats.txCount
+      recordCount.value = stats.recordCount
+    }
+  }
+
   async function fetchRecordRows(start, end, sessionId = worker.currentSessionId.value) {
     const { rows } = await worker.fetchRecordRows(sessionId, start, end)
     return rows || []
@@ -184,6 +205,8 @@ export const useRecordStore = createGlobalState(() => {
     liveRecordPreview,
     addRecord,
     clearRecords,
+    clearReadRecords,
+    clearWriteRecords,
     fetchRecordRows,
     setRecordDisplay,
     exportRecords,
