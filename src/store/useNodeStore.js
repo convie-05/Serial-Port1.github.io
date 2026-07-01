@@ -1,10 +1,6 @@
 import { createGlobalState, useLocalStorage } from '@vueuse/core'
 import { computed, ref } from 'vue'
 
-function isValidPosition(p) {
-  return p && Number.isFinite(p.x) && Number.isFinite(p.y)
-}
-
 /**
  * 节点拓扑控制 Store
  * 管理所有节点信息、绑定关系、布局位置
@@ -18,15 +14,6 @@ export const useNodeStore = createGlobalState(() => {
   const selectedNodeId = ref(null)
   // 节点在SVG画布上的位置缓存
   const nodePositions = useLocalStorage('nodeTopology:positions', {}, { listenToStorageChanges: false })
-
-  // 清理已损坏的位置数据（一次性修复）
-  const cleanedPositions = {}
-  for (const id in nodePositions.value) {
-    if (isValidPosition(nodePositions.value[id])) {
-      cleanedPositions[id] = nodePositions.value[id]
-    }
-  }
-  nodePositions.value = cleanedPositions
 
   // 选中节点对象
   const selectedNode = computed(() => {
@@ -128,8 +115,6 @@ export const useNodeStore = createGlobalState(() => {
 
   // 更新节点位置（SVG拖拽后保存）
   function updateNodePosition(id, x, y) {
-    if (!Number.isFinite(x) || !Number.isFinite(y))
-      return
     nodePositions.value = { ...nodePositions.value, [id]: { x, y } }
   }
 
@@ -160,7 +145,6 @@ export const useNodeStore = createGlobalState(() => {
     selectedNode,
     controllers,
     actuators,
-    nodePositions,
     addNode,
     removeNode,
     updateNodeStatus,
