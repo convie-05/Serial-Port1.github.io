@@ -1,5 +1,9 @@
 import { onUnmounted, ref, watch } from 'vue'
 
+function isValidPosition(p) {
+  return p && Number.isFinite(p.x) && Number.isFinite(p.y)
+}
+
 /**
  * 轻量级力导向布局
  * 为节点拓扑提供弹簧物理：拖拽一个节点时，绑定节点会像被弹簧牵引一样跟随
@@ -32,8 +36,11 @@ export function useNodeForceLayout({
   }
 
   function ensureNode(id) {
-    if (!positions.value[id]) {
-      const init = getInitialPosition?.(id) || { x: width.value / 2, y: height.value / 2 }
+    if (!isValidPosition(positions.value[id])) {
+      const fromStore = getInitialPosition?.(id)
+      const init = isValidPosition(fromStore)
+        ? fromStore
+        : { x: width.value / 2, y: height.value / 2 }
       positions.value = { ...positions.value, [id]: { ...init } }
       velocities.value = { ...velocities.value, [id]: { vx: 0, vy: 0 } }
     }
@@ -169,6 +176,8 @@ export function useNodeForceLayout({
   }
 
   function updatePosition(id, x, y) {
+    if (!Number.isFinite(x) || !Number.isFinite(y))
+      return
     positions.value = { ...positions.value, [id]: { x, y } }
     velocities.value = { ...velocities.value, [id]: { vx: 0, vy: 0 } }
   }

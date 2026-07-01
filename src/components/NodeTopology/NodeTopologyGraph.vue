@@ -10,6 +10,10 @@ const props = defineProps({
 
 const emit = defineEmits(['nodeClick', 'nodeDblclick'])
 
+function isValidPosition(p) {
+  return p && Number.isFinite(p.x) && Number.isFinite(p.y)
+}
+
 const store = useNodeStore()
 const svgRef = ref(null)
 
@@ -33,7 +37,7 @@ const { positions: simPositions, stop, updatePosition } = useNodeForceLayout({
   getInitialPosition: id => store.getNodePosition(id),
 })
 
-// 布局：根据节点数量自动分配位置
+// 布局：根据节点数量自动分配位置（仅对无效位置重新分配）
 function autoLayout() {
   const controllers = store.controllers.value
   const actuators = store.actuators.value
@@ -42,14 +46,14 @@ function autoLayout() {
   const actGapX = (props.width - padding * 2) / Math.max(actuators.length || 1, 1)
 
   controllers.forEach((node, i) => {
-    if (!store.getNodePosition(node.id)) {
+    if (!isValidPosition(store.getNodePosition(node.id))) {
       const x = padding + i * ctrlGapX + ctrlGapX / 2
       store.updateNodePosition(node.id, x, 80)
     }
   })
 
   actuators.forEach((node, i) => {
-    if (!store.getNodePosition(node.id)) {
+    if (!isValidPosition(store.getNodePosition(node.id))) {
       const x = padding + i * actGapX + actGapX / 2
       store.updateNodePosition(node.id, x, props.height - 80)
     }
@@ -66,9 +70,11 @@ onMounted(() => {
 
 onUnmounted(() => {
   stop()
-  // 批量保存最终位置
+  // 批量保存最终位置，过滤无效坐标
   Object.entries(simPositions.value).forEach(([id, p]) => {
-    store.updateNodePosition(id, p.x, p.y)
+    if (isValidPosition(p)) {
+      store.updateNodePosition(id, p.x, p.y)
+    }
   })
 })
 
@@ -87,7 +93,13 @@ watch(() => store.nodePositions.value, (stored) => {
 }, { deep: true, immediate: true })
 
 function getPos(id) {
-  return simPositions.value[id] || store.getNodePosition(id) || { x: props.width / 2, y: props.height / 2 }
+  const sim = simPositions.value[id]
+  if (isValidPosition(sim))
+    return sim
+  const stored = store.getNodePosition(id)
+  if (isValidPosition(stored))
+    return stored
+  return { x: props.width / 2, y: props.height / 2 }
 }
 
 // 节点在画布上的渲染数据
